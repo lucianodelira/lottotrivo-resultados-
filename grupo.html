@@ -10,14 +10,14 @@
   <meta name="keywords" content="Lotto Trivo, grupo WhatsApp loteria, sugestão de jogo, milhar, centena, dezena, atrasados loteria, palpitão, análise loteria, jogo do bicho, horários de sorteio">
   <meta name="author" content="Lotto Trivo Analyzer">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <link rel="canonical" href="https://SEU-USUARIO.github.io/SEU-REPO/grupo.html">
+  <link rel="canonical" href="https://login.lottotrivo.net/grupo.html">
 
   <!-- Open Graph -->
   <meta property="og:locale" content="pt_BR">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Grupo WhatsApp Lotto Trivo | Sugestões e Análises">
   <meta property="og:description" content="Mais de 150 membros. Receba sugestões de jogo, atrasados e alertas dos sorteios no WhatsApp. Entre grátis.">
-  <meta property="og:url" content="https://SEU-USUARIO.github.io/SEU-REPO/grupo.html">
+  <meta property="og:url" content="https://login.lottotrivo.net/grupo.html">
   <meta property="og:site_name" content="Lotto Trivo">
 
   <!-- Twitter -->
@@ -27,95 +27,143 @@
 
   <style>
     :root {
-      --bg: #080c12;
-      --card: #121820;
-      --border: #1e2a3a;
-      --text: #eef3f9;
-      --muted: #8b9bb4;
+      --bg: #06090f;
+      --bg-elevated: #0b111a;
+      --card: #111821;
+      --card-hover: #161f2b;
+      --border: #1c2736;
+      --border-light: #273447;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --muted: #64748b;
       --whatsapp: #25D366;
+      --whatsapp-dark: #1da851;
       --accent: #22d3ee;
       --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --success: #10b981;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 20px 50px rgba(0,0,0,0.45);
+      --shadow-sm: 0 8px 24px rgba(0,0,0,0.25);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      background: radial-gradient(ellipse at top, #0f172a 0%, #080c12 75%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.55;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.18), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34,211,238,0.08), transparent);
+      pointer-events: none;
+      z-index: 0;
     }
     .container {
-      max-width: 560px;
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
       margin: 0 auto;
-      padding: 36px 18px 70px;
+      padding: 40px 18px 80px;
     }
     .logo {
       text-align: center;
-      font-size: 12px;
-      letter-spacing: 4px;
+      font-size: 11px;
+      letter-spacing: 3.5px;
       color: var(--muted);
       font-weight: 600;
-      margin-bottom: 6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
     }
     h1 {
       text-align: center;
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
+      letter-spacing: -0.5px;
       margin-bottom: 10px;
-      background: linear-gradient(135deg, #60a5fa, #22d3ee);
+      background: linear-gradient(135deg, #93c5fd 0%, #22d3ee 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .subtitle {
       text-align: center;
-      color: var(--muted);
+      color: var(--text-secondary);
       font-size: 15px;
-      margin-bottom: 22px;
+      margin-bottom: 28px;
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .membros {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 28px;
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--text-secondary);
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 999px;
+      padding: 10px 20px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
     }
     .membros strong {
       color: #34d399;
       font-size: 16px;
+      font-weight: 700;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 26px 20px;
+      border-radius: 20px;
+      padding: 28px 22px;
       margin-bottom: 18px;
-      box-shadow: 0 14px 36px rgba(0,0,0,0.35);
+      box-shadow: var(--shadow);
     }
     .card h2 {
-      font-size: 17px;
-      margin-bottom: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
       text-align: center;
+      color: var(--text);
+      letter-spacing: -0.2px;
     }
     .beneficios {
       list-style: none;
-      margin-bottom: 22px;
+      margin-bottom: 24px;
     }
     .beneficios li {
-      padding: 9px 0;
+      padding: 12px 0;
       font-size: 14px;
       color: #cbd5e1;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: flex-start;
-      border-bottom: 1px solid rgba(30,42,58,0.6);
+      border-bottom: 1px solid rgba(28,39,54,0.8);
     }
     .beneficios li:last-child { border-bottom: none; }
     .beneficios li span {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(37,211,102,0.15);
       color: var(--whatsapp);
       font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
     }
     .btn {
@@ -124,61 +172,88 @@
       justify-content: center;
       gap: 10px;
       width: 100%;
-      padding: 15px 18px;
+      padding: 16px 18px;
       border-radius: 14px;
       font-size: 15px;
       font-weight: 700;
       text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s;
       margin-bottom: 12px;
+      letter-spacing: 0.2px;
     }
     .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
     .btn-whatsapp {
-      background: var(--whatsapp);
+      background: linear-gradient(135deg, #25D366, #1da851);
       color: #fff;
-      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+      box-shadow: 0 10px 28px rgba(37, 211, 102, 0.35);
     }
+    .btn-whatsapp:hover { box-shadow: 0 14px 36px rgba(37, 211, 102, 0.45); }
     .btn-analyzer {
       background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: #fff;
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.3);
     }
-    .btn svg { width: 22px; height: 22px; fill: currentColor; }
+    .btn-analyzer:hover { box-shadow: 0 14px 36px rgba(37, 99, 235, 0.4); }
+    .btn svg { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; }
     .aviso {
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      margin-top: 4px;
+      margin-top: 6px;
     }
+    .strategies {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .strat-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .strat-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .strat-card .title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .strat-card .desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
     .seo-text {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px 18px;
-      margin-top: 10px;
+      border-radius: 18px;
+      padding: 24px 20px;
+      margin-top: 8px;
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--text-secondary);
       text-align: left;
     }
     .seo-text h2 {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      font-weight: 700;
     }
     .seo-text p { margin-bottom: 12px; }
     .seo-text ul {
-      margin: 10px 0 12px 18px;
+      margin: 10px 0 14px 18px;
     }
     .seo-text li { margin-bottom: 6px; }
     .footer {
       text-align: center;
-      margin-top: 32px;
+      margin-top: 36px;
       font-size: 12px;
-      color: #64748b;
+      color: var(--muted);
     }
     .footer a {
       color: var(--accent);
       text-decoration: none;
+      font-weight: 500;
+    }
+    .footer a:hover { text-decoration: underline; }
+    @media (max-width: 420px) {
+      .strategies { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
     }
   </style>
 </head>
@@ -204,21 +279,44 @@
         <li><span>✓</span> Acesso gratuito ao Analyzer completo</li>
       </ul>
 
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="icon">📈</div>
+          <div class="title">Estratégia Atraso</div>
+          <div class="desc">Prioriza números com maior atraso histórico</div>
+        </div>
+        <div class="strat-card">
+          <div class="icon">🔥</div>
+          <div class="title">Estratégia Hot</div>
+          <div class="desc">Dezenas e grupos com alta frequência recente</div>
+        </div>
+        <div class="strat-card">
+          <div class="icon">🎯</div>
+          <div class="title">Score Combinado</div>
+          <div class="desc">Ranking por atraso + frequência + ciclo</div>
+        </div>
+        <div class="strat-card">
+          <div class="icon">1️⃣</div>
+          <div class="title">1ª Posição</div>
+          <div class="desc">Análise exclusiva da primeira casa</div>
+        </div>
+      </div>
+
       <!-- BOTÃO WHATSAPP -->
       <a class="btn btn-whatsapp" href="https://chat.whatsapp.com/G84SxWqi1i46vMBhS5pNpT" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Entrar no Grupo WhatsApp
       </a>
 
-      <!-- BOTÃO ANALYZER - TROQUE PELA URL REAL DO SEU SITE -->
-      <a class="btn btn-analyzer" href="https://SEU-USUARIO.github.io/SEU-REPO/" target="_blank" rel="noopener">
+      <!-- BOTÃO ANALYZER -->
+      <a class="btn btn-analyzer" href="https://login.lottotrivo.net/" target="_blank" rel="noopener">
         Abrir Lotto Trivo Analyzer
       </a>
 
       <p class="aviso">Ao clicar no botão verde você será redirecionado para o WhatsApp.</p>
     </div>
 
-    <!-- TEXTO SEO (ajuda o Google a entender a página) -->
+    <!-- TEXTO SEO -->
     <div class="seo-text">
       <h2>Sobre o Lotto Trivo e o grupo no WhatsApp</h2>
       <p>
@@ -236,6 +334,8 @@
         <li>Análise exclusiva da 1ª posição</li>
         <li>Palpitão com as dezenas mais fortes</li>
         <li>Histórico de previsões e taxa de acerto</li>
+        <li>Score combinado (atraso + frequência + ciclo)</li>
+        <li>Estratégias Hot / Cold e padrões de dígitos</li>
       </ul>
       <p>
         Para participar, clique em <strong>Entrar no Grupo WhatsApp</strong> e aceite o convite.
@@ -245,8 +345,8 @@
 
     <div class="footer">
       <p>Lotto Trivo Analyzer · Análises e sugestões de loteria</p>
-      <p style="margin-top:8px;">
-        <a href="https://SEU-USUARIO.github.io/SEU-REPO/">Acessar o Analyzer</a>
+      <p style="margin-top:10px;">
+        <a href="https://login.lottotrivo.net/">Acessar o Analyzer</a>
         ·
         <a href="https://chat.whatsapp.com/G84SxWqi1i46vMBhS5pNpT">Grupo WhatsApp</a>
       </p>
