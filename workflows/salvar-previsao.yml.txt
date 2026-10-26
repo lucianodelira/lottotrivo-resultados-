@@ -1,0 +1,60 @@
+name: Salvar Previsões Automaticamente
+
+on:
+  schedule:
+    # Horário de Brasília = UTC - 3
+
+    # 01:30 Brasil
+    - cron: '30 4 * * *'
+
+    # 05:30 Brasil
+    - cron: '30 8 * * *'
+
+    # 07:30 Brasil
+    - cron: '30 10 * * *'
+
+    # 09:30 Brasil
+    - cron: '30 12 * * *'
+
+    # 11:30 Brasil
+    - cron: '30 14 * * *'
+
+    # 13:35 Brasil
+    - cron: '35 16 * * *'
+
+    # 15:35 Brasil
+    - cron: '35 18 * * *'
+
+    # 18:35 Brasil
+    - cron: '35 21 * * *'
+
+    # 20:35 Brasil
+    - cron: '35 23 * * *'
+
+    # 22:35 Brasil
+    - cron: '35 1 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  salvar-previsao:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Executar salvar_previsao
+        run: |
+          echo "Executando salvar_previsao..."
+
+          URL="https://script.google.com/macros/s/AKfycbyQpGrbaq8q8xUB6n2qT6tabyg7cJ6zdw3l1V5yb1ftKWy2Hl8s1YdCsYZ0ARu_kk4KHg/exec?action=salvar_previsao"
+
+          RESPOSTA=$(curl -L -s --max-time 60 "$URL")
+
+          echo "Resposta da API:"
+          echo "$RESPOSTA"
+
+          if echo "$RESPOSTA" | grep -q '"sucesso":true'; then
+            echo "Previsão salva com sucesso!"
+          else
+            echo "A API respondeu, mas não confirmou sucesso."
+            exit 1
+          fi

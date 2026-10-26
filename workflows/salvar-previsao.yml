@@ -1,0 +1,31 @@
+name: Salvar Previsão Automática
+
+on:
+  schedule:
+    # Roda a cada 1 hora
+    - cron: '0 * * * *'
+  workflow_dispatch: # Permite rodar manualmente também
+
+jobs:
+  salvar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar API Salvar Previsão
+        run: |
+          echo "Iniciando salvamento automático..."
+          
+          response=$(curl -s -L -w "\n%{http_code}" \
+            "https://script.google.com/macros/s/AKfycbyoE0w5IJ7wuX53rvHIdwxLbcICtUIffx1ib_W6CXC_VRD-zjQOLWxcFVLV1Yoqe--ZOQ/exec?action=salvar_previsao")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          
+          echo "Status HTTP: $http_code"
+          echo "Resposta da API: $body"
+          
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 400 ]; then
+            echo "✅ Previsão salva com sucesso!"
+          else
+            echo "❌ Falha ao salvar previsão"
+            exit 1
+          fi

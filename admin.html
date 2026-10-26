@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Admin · Lotto Trivo</title>
+<style>
+  :root {
+    --bg: #080c12;
+    --card: #121820;
+    --border: #1e2a3a;
+    --text: #eef3f9;
+    --muted: #8b9bb4;
+    --primary: #3b82f6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --accent: #22d3ee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 50px; }
+
+  /* LOGIN */
+  #admin-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(ellipse at top, #0f172a 0%, #080c12 70%);
+  }
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .login-box h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #60a5fa, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .login-box .sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #0f1520;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+  }
+  .form-group input:focus { border-color: var(--primary); }
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .error {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* PAINEL */
+  #admin-panel { display: none; }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 {
+    font-size: 26px;
+    background: linear-gradient(135deg, #60a5fa, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .btn-sair {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .card-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+  .card-stat .num {
+    font-size: 34px;
+    font-weight: 800;
+    margin: 6px 0;
+  }
+  .card-stat .label { font-size: 13px; color: var(--muted); }
+  .card-stat.total .num { color: #60a5fa; }
+  .card-stat.ok .num { color: #34d399; }
+  .card-stat.pend .num { color: #fbbf24; }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #0f1520;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+  .search-box:focus { border-color: var(--primary); }
+  .btn-atualizar {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .tabela-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 700px;
+  }
+  th {
+    text-align: left;
+    padding: 14px 14px;
+    background: #0f1520;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1a222d; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-ok {
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+  }
+  .badge-pend {
+    background: rgba(251,191,36,0.15);
+    color: #fbbf24;
+  }
+
+  .btn-acao {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 6px;
+  }
+  .btn-confirmar {
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .btn-remover {
+    background: rgba(239,68,68,0.12);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .btn-acao:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+  .status-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN ADMIN -->
+<div id="admin-login">
+  <div class="login-box">
+    <h1>Admin Lotto Trivo</h1>
+    <div class="sub">Acesso restrito</div>
+    <div class="error" id="login-error"></div>
+    <div class="form-group">
+      <label>Senha de administrador</label>
+      <input type="password" id="admin-senha" placeholder="••••••••" autofocus>
+    </div>
+    <button class="btn" id="btn-entrar" onclick="fazerLoginAdmin()">Entrar</button>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="admin-panel">
+  <div class="container">
+    <div class="header">
+      <h1>Painel Admin</h1>
+      <button class="btn-sair" onclick="sairAdmin()">Sair</button>
+    </div>
+
+    <div class="status-bar" id="status-bar">Carregando dados...</div>
+
+    <div class="cards">
+      <div class="card-stat total">
+        <div class="label">Total de cadastros</div>
+        <div class="num" id="stat-total">—</div>
+      </div>
+      <div class="card-stat ok">
+        <div class="label">Confirmados</div>
+        <div class="num" id="stat-ok">—</div>
+      </div>
+      <div class="card-stat pend">
+        <div class="label">Pendentes</div>
+        <div class="num" id="stat-pend">—</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search-box" id="busca-email" placeholder="🔍 Buscar por e-mail..." oninput="filtrarTabela()">
+      <button class="btn-atualizar" onclick="carregarUsuarios()">🔄 Atualizar</button>
+    </div>
+
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Cadastro</th>
+            <th>Status</th>
+            <th>Último acesso</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="lista-usuarios">
+          <tr><td colspan="7" class="empty">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== CONFIG ======
+const API = 'https://script.google.com/macros/s/AKfycbyoE0w5IJ7wuX53rvHIdwxLbcICtUIffx1ib_W6CXC_VRD-zjQOLWxcFVLV1Yoqe--ZOQ/exec';
+const SENHA_ADMIN = 'admin123';  // ← TROQUE ESTA SENHA
+
+let todosUsuarios = [];
+
+// ====== LOGIN ======
+function fazerLoginAdmin() {
+  const senha = document.getElementById('admin-senha').value.trim();
+  const erro = document.getElementById('login-error');
+  if (senha !== SENHA_ADMIN) {
+    erro.textContent = 'Senha incorreta';
+    erro.style.display = 'block';
+    return;
+  }
+  erro.style.display = 'none';
+  localStorage.setItem('lt_admin', '1');
+  mostrarPainel();
+}
+
+function sairAdmin() {
+  localStorage.removeItem('lt_admin');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('admin-senha').value = '';
+}
+
+function verificarSessaoAdmin() {
+  if (localStorage.getItem('lt_admin') === '1') mostrarPainel();
+}
+
+function mostrarPainel() {
+  document.getElementById('admin-login').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  carregarUsuarios();
+}
+
+// ====== API ======
+async function apiAdmin(action, params = {}) {
+  const qs = new URLSearchParams({ action, ...params }).toString();
+  const res = await fetch(API + '?' + qs, { cache: 'no-store' });
+  const data = await res.json();
+  if (!data.sucesso) throw new Error(data.erro || 'Erro na API');
+  return data;
+}
+
+// ====== CARREGAR ======
+async function carregarUsuarios() {
+  const status = document.getElementById('status-bar');
+  const tbody = document.getElementById('lista-usuarios');
+  status.textContent = 'Atualizando lista...';
+  tbody.innerHTML = '<tr><td colspan="7" class="empty">Carregando...</td></tr>';
+
+  try {
+    const data = await apiAdmin('admin_usuarios');
+    todosUsuarios = data.usuarios || [];
+
+    document.getElementById('stat-total').textContent = data.total || 0;
+    document.getElementById('stat-ok').textContent = data.confirmados || 0;
+    document.getElementById('stat-pend').textContent = data.pendentes || 0;
+    status.textContent = `Atualizado agora · ${data.total || 0} usuário(s)`;
+
+    renderTabela(todosUsuarios);
+  } catch (e) {
+    status.textContent = 'Erro: ' + e.message;
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">Erro: ${e.message}</td></tr>`;
+  }
+}
+
+function renderTabela(lista) {
+  const tbody = document.getElementById('lista-usuarios');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum usuário encontrado.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = lista.map((u, i) => `
+    <tr data-email="${esc(u.email)}">
+      <td>${i + 1}</td>
+      <td>${esc(u.nome || '—')}</td>
+      <td>${esc(u.email || '—')}</td>
+      <td>${esc(u.criado || '—')}</td>
+      <td>
+        <span class="badge ${u.confirmado ? 'badge-ok' : 'badge-pend'}">
+          ${u.confirmado ? 'Confirmado' : 'Pendente'}
+        </span>
+      </td>
+      <td>${esc(u.ultimo_acesso || '—')}</td>
+      <td>
+        ${!u.confirmado ? `<button class="btn-acao btn-confirmar" onclick="confirmarUsuario('${esc(u.email)}')">✓ Confirmar</button>` : ''}
+        <button class="btn-acao btn-remover" onclick="removerUsuario('${esc(u.email)}')">✕ Remover</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filtrarTabela() {
+  const termo = document.getElementById('busca-email').value.trim().toLowerCase();
+  if (!termo) {
+    renderTabela(todosUsuarios);
+    return;
+  }
+  const filtrados = todosUsuarios.filter(u =>
+    (u.email || '').toLowerCase().includes(termo) ||
+    (u.nome || '').toLowerCase().includes(termo)
+  );
+  renderTabela(filtrados);
+}
+
+// ====== AÇÕES ======
+async function confirmarUsuario(email) {
+  if (!confirm('Confirmar o usuário:\n' + email + ' ?')) return;
+  try {
+    document.getElementById('status-bar').textContent = 'Confirmando ' + email + '...';
+    await apiAdmin('admin_confirmar', { email });
+    await carregarUsuarios();
+    document.getElementById('status-bar').textContent = 'Usuário confirmado: ' + email;
+  } catch (e) {
+    alert('Erro ao confirmar: ' + e.message);
+  }
+}
+
+async function removerUsuario(email) {
+  if (!confirm('Tem certeza que deseja REMOVER o usuário?\n\n' + email + '\n\nEsta ação não pode ser desfeita.')) return;
+  try {
+    document.getElementById('status-bar').textContent = 'Removendo ' + email + '...';
+    await apiAdmin('admin_remover', { email });
+    await carregarUsuarios();
+    document.getElementById('status-bar').textContent = 'Usuário removido: ' + email;
+  } catch (e) {
+    alert('Erro ao remover: ' + e.message);
+  }
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+document.getElementById('admin-senha').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') fazerLoginAdmin();
+});
+
+verificarSessaoAdmin();
+</script>
+</body>
+</html>

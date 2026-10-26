@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Lotto Trivo Analyzer</title>
+<style>
+  :root {
+    --bg: #080c12; --card: #121820; --card-hover: #1a222d; --border: #1e2a3a;
+    --text: #eef3f9; --muted: #8b9bb4; --primary: #3b82f6; --success: #10b981;
+    --danger: #ef4444; --accent: #22d3ee; --green-border: #1a4d35;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.45;
+  }
+  .app { max-width: 980px; margin: 0 auto; padding: 16px 14px 50px; }
+  .header { text-align: center; padding: 10px 0 16px; }
+  .logo { font-size: 12px; letter-spacing: 3px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+  h1 {
+    font-size: 28px; font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #22d3ee);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .status {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 13px 16px; margin-bottom: 14px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .status .dot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--success);
+    flex-shrink: 0; box-shadow: 0 0 8px var(--success);
+  }
+  .status.error .dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .nav { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-bottom: 14px; }
+  @media (max-width: 900px) { .nav { grid-template-columns: repeat(5, 1fr); } }
+  @media (max-width: 520px) { .nav { grid-template-columns: repeat(3, 1fr); } }
+  .nav-btn {
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    border-radius: 12px; padding: 11px 3px; font-size: 10.5px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-align: center;
+  }
+  .nav-btn:hover { background: var(--card-hover); }
+  .nav-btn.active {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border-color: transparent; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  }
+  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  @media (max-width: 520px) { .actions { grid-template-columns: 1fr; } }
+  .btn {
+    border: none; border-radius: 12px; padding: 13px 12px; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s; color: #fff;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  }
+  .btn-secondary { background: var(--card); border: 1px solid var(--border); color: #fff; }
+  .btn-copy {
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    padding: 8px 14px; font-size: 12px; border-radius: 8px; cursor: pointer; margin-top: 8px;
+  }
+  .btn-copy:hover { background: #334155; }
+  .btn:active { transform: scale(0.98); }
+  .subnav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+  @media (max-width: 520px) { .subnav { grid-template-columns: repeat(2, 1fr); } }
+  .sub-btn {
+    border: 1px solid var(--border); background: #0f1520; color: var(--muted);
+    border-radius: 10px; padding: 11px 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .sub-btn:hover { color: var(--text); background: var(--card); }
+  .sub-btn.active { color: #fff; border-color: transparent; }
+  .sub-btn.active.milhar  { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+  .sub-btn.active.centena { background: linear-gradient(135deg, #0891b2, #0e7490); }
+  .sub-btn.active.dezena  { background: linear-gradient(135deg, #d97706, #b45309); }
+  .sub-btn.active.grupo   { background: linear-gradient(135deg, #059669, #047857); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section { margin-bottom: 22px; }
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .section-title { font-size: 15px; font-weight: 700; }
+  .section-badge { font-size: 11px; background: #1e293b; color: var(--muted); padding: 3px 8px; border-radius: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .sugestao-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 10px; text-align: center;
+  }
+  .card .rank { font-size: 11px; color: var(--muted); }
+  .card .num { font-size: 22px; font-weight: 800; margin: 4px 0; }
+  .card .meta { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .sugestao-card {
+    background: linear-gradient(160deg, #0f2a1f, #0c1f17);
+    border: 1px solid var(--green-border); border-radius: 12px; padding: 12px 6px; text-align: center;
+  }
+  .sugestao-card .pos { font-size: 11px; color: #6ee7b7; font-weight: 600; }
+  .sugestao-card .num { font-size: 18px; font-weight: 800; }
+  .draw-header {
+    grid-column: 1 / -1; background: #1a2332; border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--muted);
+  }
+  .pos-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .pos-title { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+  .candidatos { display: flex; flex-wrap: wrap; gap: 8px; }
+  .candidato { background: #1e293b; border: 1px solid #334155; padding: 7px 11px; border-radius: 8px; font-size: 13px; }
+  .candidato strong { color: #fff; }
+  .candidato span { color: var(--muted); font-size: 12px; }
+  .empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 14px; grid-column: 1 / -1; }
+  .card.milhar  { border-color: #5b21b6; }
+  .card.centena { border-color: #0e7490; }
+  .card.dezena  { border-color: #b45309; }
+  .card.grupo   { border-color: #047857; }
+  .card.milhar  .num { color: #c4b5fd; }
+  .card.centena .num { color: #67e8f9; }
+  .card.dezena  .num { color: #fcd34d; }
+  .card.grupo   .num { color: #6ee7b7; }
+  .bar-row { display: grid; grid-template-columns: 90px 1fr 48px; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .bar-track { height: 16px; background: #1a2332; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .bar-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+  .bar-fill.milhar   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+  .bar-fill.centena  { background: linear-gradient(90deg, #0891b2, #67e8f9); }
+  .bar-fill.dezena   { background: linear-gradient(90deg, #d97706, #fcd34d); }
+  .bar-fill.grupo    { background: linear-gradient(90deg, #059669, #6ee7b7); }
+  .bar-fill.sugestao { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+  .bar-pct { font-size: 12px; font-weight: 700; text-align: right; }
+  .hist-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px; margin-bottom: 10px; text-align: left;
+  }
+  .hist-card .title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .hist-card .meta { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .badge-ok { color: #6ee7b7; }
+  .badge-pend { color: #fcd34d; }
+  .dezena-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 48px; height: 42px;
+    background: linear-gradient(160deg, #0f2a1f, #0c1f17);
+    border: 1px solid #1a4d35; border-radius: 10px;
+    font-weight: 800; font-size: 16px; color: #6ee7b7; margin: 4px;
+  }
+  .copy-feedback {
+    font-size: 12px; color: #6ee7b7; margin-left: 8px; opacity: 0; transition: opacity 0.3s;
+  }
+  .copy-feedback.show { opacity: 1; }
+
+  .donut-container {
+    display: flex; flex-direction: column; align-items: center;
+    background: linear-gradient(180deg, #0f172a 0%, #121820 100%);
+    border: 1px solid var(--border); border-radius: 18px;
+    padding: 22px 16px 18px; margin-bottom: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .donut-svg { width: 220px; height: 220px; }
+  .donut-center-text {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center; pointer-events: none;
+  }
+  .donut-center-value { font-size: 28px; font-weight: 800; color: #fff; }
+  .donut-center-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .donut-legend {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+    margin-top: 18px; width: 100%; max-width: 340px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .legend-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend-pct { margin-left: auto; font-weight: 700; color: #e2e8f0; }
+
+  .home-quick {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .home-quick { grid-template-columns: 1fr; } }
+  .quick-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px;
+  }
+  .quick-card h3 { font-size: 14px; margin-bottom: 10px; color: var(--accent); }
+  .quick-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .quick-chip {
+    background: #1e293b; border: 1px solid #334155;
+    padding: 5px 10px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  }
+
+  .horarios-bar {
+    background: linear-gradient(180deg, #0f172a 0%, #121820 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .horarios-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .horarios-bar-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .horarios-bar-sub { font-size: 11px; color: var(--muted); }
+  .horarios-scroll {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .horarios-scroll::-webkit-scrollbar { display: none; }
+  .horario-chip {
+    flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+    padding: 7px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    border: 1.5px solid #334155; background: #1e293b; color: #94a3b8;
+  }
+  .horario-chip:hover { background: #334155; color: #e2e8f0; }
+  .horario-chip.ok {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: transparent; color: #fff;
+    box-shadow: 0 2px 10px rgba(16,185,129,0.35);
+  }
+  .horario-chip.atual {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+  }
+  .horario-chip.pendente { opacity: 0.55; }
+
+  /* AUTH */
+  #auth-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: radial-gradient(ellipse at top, #0f172a 0%, #080c12 70%);
+  }
+  .auth-box {
+    width: 100%; max-width: 420px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 20px; padding: 32px 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .auth-logo { text-align: center; margin-bottom: 28px; }
+  .auth-logo .logo { font-size: 13px; letter-spacing: 4px; }
+  .auth-logo h1 { font-size: 26px; margin-top: 6px; }
+  .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
+  .auth-tab {
+    padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+    background: #0f1520; color: var(--muted); font-weight: 600; font-size: 14px; cursor: pointer;
+  }
+  .auth-tab.active {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; border-color: transparent;
+  }
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border);
+    background: #0f1520; color: var(--text); font-size: 15px; outline: none;
+  }
+  .form-group input:focus { border-color: var(--primary); }
+  .auth-error {
+    background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none;
+  }
+  .auth-success {
+    background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);
+    color: #6ee7b7; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none;
+  }
+  .auth-btn {
+    width: 100%; padding: 15px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .user-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; margin-bottom: 14px; font-size: 13px;
+  }
+  .user-bar .nome { color: var(--accent); font-weight: 600; }
+  .btn-logout {
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;
+  }
+
+  /* ===== BOT CHAT ===== */
+  #bot-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 999998;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+  #bot-overlay.open { display: flex; }
+  .bot-panel {
+    width: 100%;
+    max-width: 420px;
+    height: min(85vh, 680px);
+    background: #0f1520;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+  }
+  .bot-header {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bot-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .bot-header-info { flex: 1; }
+  .bot-header-info .name { font-weight: 700; font-size: 15px; }
+  .bot-header-info .status { font-size: 11px; opacity: 0.85; }
+  .bot-close-x {
+    background: rgba(255,255,255,0.15); border: none; color: #fff;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer;
+  }
+  .bot-messages {
+    flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .bot-msg {
+    max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.45;
+  }
+  .bot-msg.bot {
+    align-self: flex-start;
+    background: #1e293b; border: 1px solid #334155;
+    border-bottom-left-radius: 4px;
+  }
+  .bot-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-bottom-right-radius: 4px;
+  }
+  .bot-msg a { color: #67e8f9; text-decoration: underline; }
+  .bot-quick {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+  }
+  .bot-quick button {
+    background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
+    padding: 6px 10px; border-radius: 16px; font-size: 12px; cursor: pointer;
+  }
+  .bot-quick button:hover { border-color: #3b82f6; color: #fff; }
+  .bot-footer {
+    padding: 12px; border-top: 1px solid var(--border); background: #0a0e14;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .bot-input {
+    flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+    background: #121820; color: var(--text); font-size: 14px; outline: none;
+  }
+  .bot-send {
+    background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; color: #fff;
+    width: 44px; height: 44px; border-radius: 12px; font-size: 18px; cursor: pointer;
+  }
+  .bot-fechar-fixo {
+    width: 100%; padding: 12px; border: none; border-radius: 12px;
+    background: #1e293b; color: #fca5a5; font-weight: 700; font-size: 13px;
+    cursor: pointer; margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== TELA DE AUTENTICAÇÃO ==================== -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo">ANALYZER</div>
+      <h1>Lotto Trivo</h1>
+    </div>
+    <div class="auth-tabs" id="auth-tabs">
+      <button class="auth-tab active" onclick="mostrarAuth('login')">Entrar</button>
+      <button class="auth-tab" onclick="mostrarAuth('registro')">Criar Conta</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+    <div id="form-login" class="auth-form active">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="btn-login" onclick="fazerLogin()">Entrar</button>
+    </div>
+    <div id="form-registro" class="auth-form">
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" id="reg-nome" placeholder="Seu nome" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="reg-senha" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+      </div>
+      <button class="auth-btn" id="btn-registro" onclick="fazerRegistro()">Criar Conta</button>
+    </div>
+    <div id="form-confirmar" class="auth-form">
+      <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:18px; line-height:1.5;">
+        Enviamos um código de 6 dígitos para<br>
+        <strong id="email-confirmacao" style="color:#e2e8f0;"></strong>
+      </p>
+      <div class="form-group">
+        <label>Código de confirmação</label>
+        <input type="text" id="codigo-confirmacao" placeholder="000000" maxlength="6"
+               style="text-align:center; letter-spacing:8px; font-size:22px; font-weight:700;">
+      </div>
+      <button class="auth-btn" id="btn-confirmar" onclick="confirmarCodigo()">Confirmar Conta</button>
+      <button class="auth-btn" id="btn-reenviar" style="background:#1e293b; margin-top:10px; box-shadow:none;"
+              onclick="reenviarCodigo()">Reenviar código</button>
+      <button class="auth-btn" style="background:#1e293b; margin-top:10px; box-shadow:none;"
+              onclick="mostrarAuth('registro')">Voltar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP PRINCIPAL ==================== -->
+<div id="app-principal" style="display:none;">
+  <div class="app">
+    <div class="header">
+      <div class="logo">ANALYZER</div>
+      <h1>Lotto Trivo</h1>
+    </div>
+
+    <div class="user-bar">
+      <div>Olá, <span class="nome" id="nome-usuario">Usuário</span></div>
+      <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+
+    <div class="horarios-bar" id="horarios-bar">
+      <div class="horarios-bar-header">
+        <div>
+          <div class="horarios-bar-title">Resultados de hoje</div>
+          <div class="horarios-bar-sub">Clique em um horário para visualizá-lo</div>
+        </div>
+      </div>
+      <div class="horarios-scroll" id="horarios-scroll"></div>
+    </div>
+
+    <div class="status" id="status">
+      <div class="dot"></div>
+      <div>Carregando sistema...</div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn active" data-panel="painel-inicio" onclick="trocarPainel('painel-inicio', this)">🏠 Início</button>
+      <button class="nav-btn" data-panel="painel-atrasados" onclick="trocarPainel('painel-atrasados', this)">⏳ Atrasados</button>
+      <button class="nav-btn" data-panel="painel-pos1" onclick="trocarPainel('painel-pos1', this)">1️⃣ 1ª Posição</button>
+      <button class="nav-btn" data-panel="painel-analise" onclick="trocarPainel('painel-analise', this)">📊 Análise</button>
+      <button class="nav-btn" data-panel="painel-resultados" onclick="trocarPainel('painel-resultados', this)">📋 Resultados</button>
+      <button class="nav-btn" data-panel="painel-acertos" onclick="trocarPainel('painel-acertos', this)">✅ Acertos</button>
+      <button class="nav-btn" data-panel="painel-palpite-grupos" onclick="trocarPainel('painel-palpite-grupos', this)">🎲 Grupos</button>
+      <button class="nav-btn" data-panel="painel-palpitao" onclick="trocarPainel('painel-palpitao', this)">🔥 Palpitão</button>
+      <button class="nav-btn" data-panel="painel-explicacao" onclick="trocarPainel('painel-explicacao', this)">📖 Como Funciona</button>
+      <button class="nav-btn" onclick="abrirVip()">👑 VIP</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="coletar()">🔄 Coletar</button>
+      <button class="btn btn-secondary" onclick="previsao()">📊 Análise</button>
+      <button class="btn btn-secondary" onclick="backtest()">🧪 Backtest</button>
+    </div>
+
+    <!-- INÍCIO -->
+    <div class="panel active" id="painel-inicio">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🎯 Sugestão de Jogo</div>
+          <div class="section-badge">Próximo sorteio</div>
+        </div>
+        <div class="sugestao-grid" id="sugestao">
+          <div class="empty">Toque em <strong>Análise</strong> para gerar a sugestão.</div>
+        </div>
+        <button class="btn-copy" onclick="copiarSugestao()" id="btn-copiar-sugestao" style="display:none;">📋 Copiar Sugestão</button>
+        <span class="copy-feedback" id="feedback-sugestao">Copiado!</span>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📊 Desempenho Geral de Acertos</div>
+          <div class="section-badge" id="badge-donut">—</div>
+        </div>
+        <div class="donut-container">
+          <div style="position:relative; width:220px; height:220px;">
+            <svg class="donut-svg" viewBox="0 0 42 42" id="donut-svg">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1e293b" stroke-width="5"></circle>
+            </svg>
+            <div class="donut-center-text">
+              <div class="donut-center-value" id="donut-total">0%</div>
+              <div class="donut-center-label">Média</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+      <div class="home-quick">
+        <div class="quick-card">
+          <h3>1️⃣ 1ª Posição (Top 5)</h3>
+          <div class="quick-list" id="home-pos1"><div class="empty" style="padding:12px;font-size:13px;">Carregando...</div></div>
+        </div>
+        <div class="quick-card">
+          <h3>🔥 Palpitão (Top 8 dezenas)</h3>
+          <div class="quick-list" id="home-palpitao"><div class="empty" style="padding:12px;font-size:13px;">Carregando...</div></div>
+        </div>
+      </div>
+      <div class="section" id="secao-geral-home" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">📈 Ranking Geral</div>
+          <div class="section-badge">Top 15</div>
+        </div>
+        <div class="grid" id="ranking-geral"></div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🕘 Histórico Completo de Previsões</div>
+          <div class="section-badge">Últimas 50</div>
+        </div>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;" onclick="carregarUltimas50Previsoes('lista-historico-home')">🔄 Atualizar tudo</button>
+        <div id="lista-historico-home"><div class="empty">Carregando histórico...</div></div>
+      </div>
+    </div>
+
+    <!-- ATRASADOS -->
+    <div class="panel" id="painel-atrasados">
+      <div class="subnav">
+        <button class="sub-btn milhar active" onclick="mostrarAtrasado('milhar', this)">🎯 Milhar</button>
+        <button class="sub-btn centena" onclick="mostrarAtrasado('centena', this)">🔢 Centena</button>
+        <button class="sub-btn dezena" onclick="mostrarAtrasado('dezena', this)">📶 Dezena</button>
+        <button class="sub-btn grupo" onclick="mostrarAtrasado('grupo', this)">🎲 Grupo</button>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title" id="titulo-atrasado">10 Milhares mais atrasadas</div>
+          <div class="section-badge" id="badge-atrasado">Top 10</div>
+        </div>
+        <div class="grid" id="lista-atrasados"><div class="empty">Carregando...</div></div>
+        <button class="btn-copy" onclick="copiarAtrasados()" id="btn-copiar-atrasados" style="display:none;margin-top:12px;">📋 Copiar estes Atrasados</button>
+        <span class="copy-feedback" id="feedback-atrasados">Copiado!</span>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;margin-top:8px;" onclick="carregarAtrasados(true)">🔄 Atualizar atrasados</button>
+    </div>
+
+    <!-- 1ª POSIÇÃO -->
+    <div class="panel" id="painel-pos1">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">1️⃣ Atrasados da 1ª Posição</div>
+          <div class="section-badge">Exclusivo posição 1</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:16px;" onclick="carregarAtrasadosPos1()">🔄 Atualizar Atrasados 1ª Posição</button>
+        <div class="subnav">
+          <button class="sub-btn milhar active" onclick="mostrarPos1('milhar', this)">🎯 Milhar</button>
+          <button class="sub-btn centena" onclick="mostrarPos1('centena', this)">🔢 Centena</button>
+          <button class="sub-btn dezena" onclick="mostrarPos1('dezena', this)">📶 Dezena</button>
+          <button class="sub-btn grupo" onclick="mostrarPos1('grupo', this)">🎲 Grupo</button>
+        </div>
+        <div class="section-header">
+          <div class="section-title" id="titulo-pos1">Milhares mais atrasadas na 1ª posição</div>
+          <div class="section-badge" id="badge-pos1">Top 15</div>
+        </div>
+        <div class="grid" id="lista-pos1"><div class="empty">Toque em <strong>Atualizar Atrasados 1ª Posição</strong>.</div></div>
+        <button class="btn-copy" onclick="copiarPos1()" id="btn-copiar-pos1" style="display:none;margin-top:12px;">📋 Copiar estes da 1ª Posição</button>
+        <span class="copy-feedback" id="feedback-pos1">Copiado!</span>
+      </div>
+    </div>
+
+    <!-- ANÁLISE -->
+    <div class="panel" id="painel-analise">
+      <div class="section">
+        <div class="section-header"><div class="section-title">🎯 Sugestão de Jogo</div></div>
+        <div class="sugestao-grid" id="sugestao-analise"><div class="empty">Toque em <strong>Análise</strong>.</div></div>
+        <button class="btn-copy" onclick="copiarSugestao()" id="btn-copiar-sugestao-analise" style="display:none;">📋 Copiar Sugestão</button>
+        <span class="copy-feedback" id="feedback-sugestao-analise">Copiado!</span>
+      </div>
+      <div class="section" id="secao-geral" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">📈 Ranking Geral</div>
+          <div class="section-badge">Top 15</div>
+        </div>
+        <div class="grid" id="ranking-geral-analise"></div>
+      </div>
+      <div class="section" id="secao-posicao" style="display:none;">
+        <div class="section-header"><div class="section-title">🔢 Ranking por Posição</div></div>
+        <div id="por-posicao"></div>
+      </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="panel" id="painel-resultados">
+      <div class="section">
+        <div class="section-header"><div class="section-title">📋 Últimos Resultados</div></div>
+        <div class="grid" id="resultados"><div class="empty">Carregando resultados...</div></div>
+      </div>
+    </div>
+
+    <!-- ACERTOS -->
+    <div class="panel" id="painel-acertos">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">✅ Acertos × Último sorteio</div>
+          <div class="section-badge">Atrasados + Sugestão</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="verificarAcertos()">🔍 Verificar agora</button>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:16px;" onclick="salvarPrevisaoAgora()">💾 Salvar previsão (antes do próximo)</button>
+        <div id="box-acertos"><div class="empty">Toque em <strong>Verificar agora</strong> após o sorteio.</div></div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📈 Taxa de acerto (últimas previsões)</div>
+          <div class="section-badge" id="badge-taxas">—</div>
+        </div>
+        <div id="chart-taxas"></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">🕘 Últimas 50 previsões</div></div>
+        <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;" onclick="carregarUltimas50Previsoes()">🔄 Atualizar histórico</button>
+        <div id="lista-historico-prev"><div class="empty">Salve uma previsão antes do sorteio e verifique depois.</div></div>
+      </div>
+    </div>
+
+    <!-- GRUPOS -->
+    <div class="panel" id="painel-palpite-grupos">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🎲 Palpite por Grupos Atrasados</div>
+          <div class="section-badge">4 milhares por grupo</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:16px;" onclick="carregarPalpiteGrupos()">🔄 Gerar / Atualizar Palpite</button>
+        <div id="lista-palpite-grupos"><div class="empty">Toque em <strong>Gerar / Atualizar Palpite</strong>.</div></div>
+        <button class="btn-copy" onclick="copiarPalpiteGrupos()" id="btn-copiar-grupos" style="display:none;margin-top:12px;">📋 Copiar todas as milhares</button>
+        <span class="copy-feedback" id="feedback-grupos">Copiado!</span>
+      </div>
+    </div>
+
+    <!-- PALPITÃO -->
+    <div class="panel" id="painel-palpitao">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🔥 Análise Palpitão</div>
+          <div class="section-badge">20 dezenas fortes</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:16px;" onclick="carregarPalpitao()">🔄 Gerar / Atualizar Palpitão</button>
+        <div id="box-palpitao"><div class="empty">Toque em <strong>Gerar / Atualizar Palpitão</strong>.</div></div>
+        <button class="btn-copy" onclick="copiarPalpitao()" id="btn-copiar-palpitao" style="display:none;margin-top:12px;">📋 Copiar as 20 dezenas</button>
+        <span class="copy-feedback" id="feedback-palpitao">Copiado!</span>
+      </div>
+    </div>
+
+    <!-- COMO FUNCIONA -->
+    <div class="panel" id="painel-explicacao">
+      <div class="section">
+        <div class="section-header"><div class="section-title">📖 Como funciona</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;color:#cbd5e1;font-size:14.5px;line-height:1.6;">
+          <p style="margin-bottom:12px;"><strong>1ª Posição:</strong> Analisa exclusivamente os números que saíram na primeira posição de cada sorteio.</p>
+          <p style="margin-bottom:12px;"><strong>Palpitão:</strong> Seleciona as 20 dezenas mais fortes com base em frequência + atraso + tendência recente.</p>
+          <p style="margin-bottom:12px;"><strong>Grupos:</strong> Gera 4 milhares para cada um dos 10 grupos mais atrasados.</p>
+          <p style="margin-bottom:12px;"><strong>Automático:</strong> Salva previsão 10 min antes e 5 min depois de cada resultado. Verifica acertos no horário.</p>
+          <p>Use os botões <strong>📋 Copiar</strong> para copiar os números facilmente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BOT OVERLAY ==================== -->
+<div id="bot-overlay">
+  <div class="bot-panel">
+    <div class="bot-header">
+      <div class="bot-avatar">🤖</div>
+      <div class="bot-header-info">
+        <div class="name">Bot Lotto Trivo</div>
+        <div class="status">● Online · Pronto para ajudar</div>
+      </div>
+      <button class="bot-close-x" onclick="fecharBot()">×</button>
+    </div>
+    <div class="bot-messages" id="bot-messages"></div>
+    <div class="bot-footer" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;gap:8px;width:100%;">
+        <input type="text" class="bot-input" id="bot-input" placeholder="Digite sua pergunta..." onkeydown="if(event.key==='Enter')enviarBot()">
+        <button class="bot-send" onclick="enviarBot()">➤</button>
+      </div>
+      <button class="bot-fechar-fixo" onclick="fecharBot()">Fechar bot</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyQpGrbaq8q8xUB6n2qT6tabyg7cJ6zdw3l1V5yb1ftKWy2Hl8s1YdCsYZ0ARu_kk4KHg/exec';
+const API_EXTRA = 'https://script.google.com/macros/s/AKfycbykHrjXIhavFipJ5GrIOYwH-3sHrwq4O0RCsIxoLNctdPC-es9iylto_ZWKXkNGSKrNqw/exec';
+const API_AUTH = 'https://script.google.com/macros/s/AKfycbyoE0w5IJ7wuX53rvHIdwxLbcICtUIffx1ib_W6CXC_VRD-zjQOLWxcFVLV1Yoqe--ZOQ/exec';
+const LINK_JOGO = 'https://app.acertos.club/pr/sbrqjugZ';
+
+let cacheAtrasados = null;
+let tipoAtrasadoAtual = 'milhar';
+let cachePos1 = null;
+let tipoPos1Atual = 'milhar';
+let cacheSugestao = [];
+let cachePalpiteGrupos = [];
+let cachePalpitao = [];
+let _emailPendente = '';
+let cacheResultadosHoje = {};
+
+const HORARIOS_RESULTADOS = ['01:30','05:30','07:30','09:30','11:30','13:30','15:30','18:30','20:30','22:30'];
+const HORARIOS_VERIFICAR = ['01:32','05:32','07:32','09:32','11:32','13:32','15:32','18:32','20:32','22:32'];
+
+/* ===== AUTH ===== */
+function mostrarAuth(tipo) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+  const tabs = document.getElementById('auth-tabs');
+  if (tabs) tabs.style.display = (tipo === 'confirmar') ? 'none' : 'grid';
+  if (tipo === 'login') {
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    document.getElementById('form-login').classList.add('active');
+  } else if (tipo === 'registro') {
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    document.getElementById('form-registro').classList.add('active');
+  } else if (tipo === 'confirmar') {
+    document.getElementById('form-confirmar').classList.add('active');
+  }
+}
+function mostrarErroAuth(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('auth-success').style.display = 'none';
+}
+function mostrarSucessoAuth(msg) {
+  const el = document.getElementById('auth-success');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('auth-error').style.display = 'none';
+}
+async function apiAuth(action, params) {
+  const qs = new URLSearchParams({ action, ...params }).toString();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  const res = await fetch(API_AUTH + '?' + qs, { signal: controller.signal, cache: 'no-store' });
+  clearTimeout(timeout);
+  if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+  return await res.json();
+}
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value.trim();
+  const btn = document.getElementById('btn-login');
+  if (!email || !senha) { mostrarErroAuth('Preencha e-mail e senha'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const r = await apiAuth('login', { email, senha });
+    if (r.sucesso) {
+      localStorage.setItem('lt_user', JSON.stringify(r.usuario));
+      liberarApp(r.usuario);
+    } else {
+      if (r.erro && r.erro.toLowerCase().includes('não confirmada')) {
+        _emailPendente = email;
+        document.getElementById('email-confirmacao').textContent = email;
+        mostrarAuth('confirmar');
+        mostrarSucessoAuth('Conta pendente. Digite o código que enviamos para o seu e-mail.');
+      } else {
+        mostrarErroAuth(r.erro || 'Falha no login');
+      }
+    }
+  } catch (e) { mostrarErroAuth(e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Entrar'; }
+}
+async function fazerRegistro() {
+  const nome  = document.getElementById('reg-nome').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const senha = document.getElementById('reg-senha').value.trim();
+  const btn = document.getElementById('btn-registro');
+  if (!nome || !email || !senha) { mostrarErroAuth('Preencha todos os campos'); return; }
+  if (senha.length < 4) { mostrarErroAuth('Senha deve ter no mínimo 4 caracteres'); return; }
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  try {
+    const r = await apiAuth('registrar', { nome, email, senha });
+    if (r.sucesso) {
+      if (r.precisaConfirmar) {
+        _emailPendente = email;
+        document.getElementById('email-confirmacao').textContent = email;
+        mostrarAuth('confirmar');
+        mostrarSucessoAuth(r.mensagem || 'Código enviado! Digite o código para confirmar.');
+      } else {
+        mostrarSucessoAuth(r.mensagem || 'Conta criada! Faça login.');
+        setTimeout(() => { mostrarAuth('login'); document.getElementById('login-email').value = email; }, 1800);
+      }
+    } else {
+      if (r.erro && (r.erro.toLowerCase().includes('já está cadastrado') || r.erro.toLowerCase().includes('pendente'))) {
+        _emailPendente = email;
+        document.getElementById('email-confirmacao').textContent = email;
+        mostrarAuth('confirmar');
+        mostrarSucessoAuth('Este e-mail já está aguardando confirmação. Digite o código enviado.');
+      } else {
+        mostrarErroAuth(r.erro || 'Erro ao criar conta');
+      }
+    }
+  } catch (e) {
+    if (e.message && e.message.toLowerCase().includes('aborted')) {
+      _emailPendente = email;
+      document.getElementById('email-confirmacao').textContent = email;
+      mostrarAuth('confirmar');
+      mostrarSucessoAuth('O código pode ter sido enviado. Digite o código que chegou no e-mail.');
+    } else {
+      mostrarErroAuth(e.message);
+    }
+  } finally { btn.disabled = false; btn.textContent = 'Criar Conta'; }
+}
+async function confirmarCodigo() {
+  const email = _emailPendente || document.getElementById('reg-email').value.trim();
+  const codigo = document.getElementById('codigo-confirmacao').value.trim();
+  const btn = document.getElementById('btn-confirmar');
+  if (!codigo || codigo.length !== 6) { mostrarErroAuth('Digite o código de 6 dígitos'); return; }
+  btn.disabled = true; btn.textContent = 'Confirmando...';
+  try {
+    const r = await apiAuth('confirmar', { email, codigo });
+    if (r.sucesso) {
+      mostrarSucessoAuth('Conta confirmada! Entrando...');
+      setTimeout(() => {
+        localStorage.setItem('lt_user', JSON.stringify(r.usuario));
+        liberarApp(r.usuario);
+      }, 1200);
+    } else {
+      mostrarErroAuth(r.erro || 'Código inválido');
+    }
+  } catch (e) { mostrarErroAuth(e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Confirmar Conta'; }
+}
+async function reenviarCodigo() {
+  const email = _emailPendente || document.getElementById('email-confirmacao').textContent.trim();
+  const btn = document.getElementById('btn-reenviar');
+  if (!email) { mostrarErroAuth('E-mail não encontrado. Volte e tente novamente.'); return; }
+  btn.disabled = true; btn.textContent = 'Reenviando...';
+  try {
+    const r = await apiAuth('reenviar', { email });
+    if (r.sucesso) mostrarSucessoAuth(r.mensagem || 'Novo código enviado para o seu e-mail!');
+    else mostrarErroAuth(r.erro || 'Erro ao reenviar código');
+  } catch (e) { mostrarErroAuth(e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Reenviar código'; }
+}
+function fazerLogout() {
+  localStorage.removeItem('lt_user');
+  document.getElementById('app-principal').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('login-senha').value = '';
+  mostrarAuth('login');
+}
+function liberarApp(usuario) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-principal').style.display = 'block';
+  document.getElementById('nome-usuario').textContent = usuario.nome || usuario.email;
+  status(); carregar(); carregarHomeCompleto(); atualizarBarraHorarios();
+}
+function verificarSessao() {
+  const raw = localStorage.getItem('lt_user');
+  if (raw) {
+    try { liberarApp(JSON.parse(raw)); return; } catch(e) {}
+  }
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-principal').style.display = 'none';
+}
+
+/* ===== API PRINCIPAL ===== */
+async function api(action, timeoutMs = 45000) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(API + '?action=' + encodeURIComponent(action), { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+    const json = await res.json();
+    if (json.sucesso === false) throw new Error(json.erro || 'Erro na API');
+    return json;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('Tempo esgotado (timeout)');
+    throw e;
+  }
+}
+async function apiExtra(action, timeoutMs = 45000) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(API_EXTRA + '?action=' + encodeURIComponent(action), { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+    const json = await res.json();
+    if (json.sucesso === false) throw new Error(json.erro || 'Erro na API Extra');
+    return json;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('Tempo esgotado (timeout)');
+    throw e;
+  }
+}
+function setStatus(html, isError = false) {
+  const el = document.getElementById('status');
+  if (!el) return;
+  el.className = 'status' + (isError ? ' error' : '');
+  el.innerHTML = `<div class="dot"></div><div>${html}</div>`;
+}
+function trocarPainel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'painel-atrasados') carregarAtrasados();
+  if (id === 'painel-pos1') carregarAtrasadosPos1();
+  if (id === 'painel-resultados') carregar();
+  if (id === 'painel-acertos') carregarUltimas50Previsoes();
+  if (id === 'painel-palpite-grupos') carregarPalpiteGrupos();
+  if (id === 'painel-palpitao') carregarPalpitao();
+  if (id === 'painel-inicio') carregarHomeCompleto();
+}
+function formatarData(data) {
+  if (!data) return '--/--/----';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+  try {
+    const d = new Date(data);
+    if (!isNaN(d.getTime()) && d.getFullYear() > 2000) {
+      return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    }
+  } catch(e){}
+  return String(data).substring(0, 16);
+}
+function normalizarHora(horaStr) {
+  if (!horaStr) return '';
+  const m = String(horaStr).match(/(\d{1,2})[:hH]?(\d{2})/);
+  if (!m) return '';
+  return String(m[1]).padStart(2,'0') + ':' + m[2];
+}
+async function atualizarBarraHorarios() {
+  const scroll = document.getElementById('horarios-scroll');
+  if (!scroll) return;
+  try {
+    const r = await api('resultados');
+    const hoje = new Date().toISOString().slice(0,10);
+    cacheResultadosHoje = {};
+    (r.resultados || []).forEach(concurso => {
+      let dataStr = concurso.data || '';
+      if (dataStr.includes('/')) {
+        const [d,m,a] = dataStr.split('/');
+        dataStr = `${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+      }
+      if (dataStr.startsWith(hoje) || dataStr === hoje) {
+        const h = normalizarHora(concurso.hora);
+        if (h) cacheResultadosHoje[h] = true;
+      }
+    });
+    const agora = new Date();
+    const hmAgora = String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+    scroll.innerHTML = '';
+    HORARIOS_RESULTADOS.forEach(hora => {
+      const chip = document.createElement('div');
+      chip.className = 'horario-chip';
+      const temResultado = !!cacheResultadosHoje[hora];
+      const jaPassou = hmAgora >= hora;
+      if (temResultado) { chip.classList.add('ok'); chip.innerHTML = `<span class="check">✓</span> ${hora}`; }
+      else if (jaPassou) { chip.classList.add('pendente'); chip.textContent = hora; }
+      else { chip.textContent = hora; }
+      if (!temResultado && !jaPassou) {
+        const idx = HORARIOS_RESULTADOS.indexOf(hora);
+        const prev = idx > 0 ? HORARIOS_RESULTADOS[idx-1] : null;
+        if (!prev || cacheResultadosHoje[prev] || hmAgora >= prev) chip.classList.add('atual');
+      }
+      chip.onclick = () => {
+        trocarPainel('painel-resultados', document.querySelector('[data-panel="painel-resultados"]'));
+        setTimeout(() => {
+          document.querySelectorAll('#resultados .draw-header').forEach(c => {
+            if (c.textContent.includes(hora) || c.textContent.includes(hora.replace(':', 'h'))) {
+              c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              c.style.outline = '2px solid #22d3ee';
+              setTimeout(() => c.style.outline = '', 2500);
+            }
+          });
+        }, 300);
+      };
+      scroll.appendChild(chip);
+    });
+  } catch (e) { console.warn('Erro barra horários:', e.message); }
+}
+function copiarTexto(texto, feedbackId) {
+  if (!texto) return;
+  navigator.clipboard.writeText(texto).then(() => {
+    const fb = document.getElementById(feedbackId);
+    if (fb) { fb.classList.add('show'); setTimeout(() => fb.classList.remove('show'), 1800); }
+    setStatus('Números copiados com sucesso!');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = texto; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    setStatus('Números copiados!');
+  });
+}
+function copiarSugestao() { if (!cacheSugestao.length) return; copiarTexto(cacheSugestao.join(' '), 'feedback-sugestao'); }
+function copiarAtrasados() {
+  if (!cacheAtrasados || !cacheAtrasados[tipoAtrasadoAtual]) return;
+  copiarTexto(cacheAtrasados[tipoAtrasadoAtual].map(i => i.valor).join(' '), 'feedback-atrasados');
+}
+function copiarPos1() {
+  if (!cachePos1 || !cachePos1[tipoPos1Atual]) return;
+  copiarTexto(cachePos1[tipoPos1Atual].map(i => i.valor).join(' '), 'feedback-pos1');
+}
+function copiarPalpiteGrupos() {
+  if (!cachePalpiteGrupos.length) return;
+  const todos = [];
+  cachePalpiteGrupos.forEach(g => (g.milhares || []).forEach(m => todos.push(m.milhar)));
+  copiarTexto(todos.join(' '), 'feedback-grupos');
+}
+function copiarPalpitao() {
+  if (!cachePalpitao.length) return;
+  copiarTexto(cachePalpitao.map(d => d.dezena).join(' '), 'feedback-palpitao');
+}
+async function status() {
+  try { const r = await api('status'); setStatus(`Sistema online · ${r.hora || ''}`); }
+  catch (e) { setStatus('API indisponível · ' + e.message, true); }
+}
+async function coletar() {
+  setStatus('Coletando dados... (pode demorar até 90s)');
+  try {
+    const r = await api('coletar', 90000);
+    setStatus(`Coleta concluída · ${r.gravados || r.importados || 0} registros`);
+    carregar(); carregarHomeCompleto(); atualizarBarraHorarios();
+  } catch (e) { setStatus('Erro na coleta: ' + e.message, true); }
+}
+async function carregar() {
+  try {
+    const r = await api('resultados');
+    const div = document.getElementById('resultados');
+    div.innerHTML = '';
+    if (!r.resultados || !r.resultados.length) {
+      div.innerHTML = '<div class="empty">Nenhum resultado.<br>Toque em <strong>Coletar</strong>.</div>';
+      return;
+    }
+    setStatus(`Mostrando ${r.resultados.length} sorteios recentes`);
+    r.resultados.forEach(concurso => {
+      const header = document.createElement('div');
+      header.className = 'draw-header';
+      header.innerHTML = `🕐 ${formatarData(concurso.data)} · ${concurso.hora || ''}`;
+      div.appendChild(header);
+      (concurso.numeros || []).forEach((numero, pos) => {
+        if (!numero) return;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<div class="rank">Posição ${pos + 1}</div><div class="num">${numero}</div>`;
+        div.appendChild(card);
+      });
+    });
+    atualizarBarraHorarios();
+  } catch (e) { setStatus('Erro ao carregar resultados: ' + e.message, true); }
+}
+async function carregarAtrasados(forcar) {
+  const div = document.getElementById('lista-atrasados');
+  if (!forcar && cacheAtrasados) { renderAtrasados(tipoAtrasadoAtual); return; }
+  div.innerHTML = '<div class="empty">Atualizando atrasados...</div>';
+  setStatus('Calculando Top 10 atrasados...');
+  try {
+    const r = await api('atrasados');
+    cacheAtrasados = {
+      totalSorteios: r.totalSorteios || 0,
+      milhar: Array.isArray(r.milhar) ? r.milhar : [],
+      centena: Array.isArray(r.centena) ? r.centena : [],
+      dezena: Array.isArray(r.dezena) ? r.dezena : [],
+      grupo: Array.isArray(r.grupo) ? r.grupo : []
+    };
+    setStatus(`Atrasados atualizados · ${cacheAtrasados.totalSorteios} sorteios`);
+    renderAtrasados(tipoAtrasadoAtual);
+  } catch (e) {
+    div.innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    setStatus('Erro ao carregar atrasados', true);
+  }
+}
+function mostrarAtrasado(tipo, btn) {
+  tipoAtrasadoAtual = tipo;
+  document.querySelectorAll('#painel-atrasados .sub-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (!cacheAtrasados) { carregarAtrasados(true); return; }
+  renderAtrasados(tipo);
+}
+function renderAtrasados(tipo) {
+  const div = document.getElementById('lista-atrasados');
+  const titulo = document.getElementById('titulo-atrasado');
+  const badge = document.getElementById('badge-atrasado');
+  const labels = { milhar: '10 Milhares mais atrasadas', centena: '10 Centenas mais atrasadas', dezena: '10 Dezenas mais atrasadas', grupo: '10 Grupos mais atrasados' };
+  titulo.textContent = labels[tipo] || 'Atrasados';
+  badge.textContent = 'Top 10';
+  div.innerHTML = '';
+  if (!cacheAtrasados) { div.innerHTML = '<div class="empty">Carregando...</div>'; return; }
+  const lista = cacheAtrasados[tipo] || [];
+  if (!lista.length) {
+    div.innerHTML = `<div class="empty">Nenhum dado de <strong>${tipo}</strong>.</div>`;
+    document.getElementById('btn-copiar-atrasados').style.display = 'none';
+    return;
+  }
+  lista.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card ' + tipo;
+    card.innerHTML = `<div class="rank">#${item.posicao}</div><div class="num">${item.valor}</div>
+      <div class="meta">Atraso: ${item.atraso} sorteios<br>Freq: ${item.frequencia}<br>${item.ultimo_numero || ''}</div>`;
+    div.appendChild(card);
+  });
+  document.getElementById('btn-copiar-atrasados').style.display = 'inline-block';
+}
+async function carregarAtrasadosPos1() {
+  const div = document.getElementById('lista-pos1');
+  div.innerHTML = '<div class="empty">Calculando atrasados da 1ª posição...</div>';
+  setStatus('Analisando apenas a 1ª posição...');
+  try {
+    const r = await apiExtra('atrasados_pos1');
+    cachePos1 = { milhar: r.milhar || [], centena: r.centena || [], dezena: r.dezena || [], grupo: r.grupo || [], totalSorteios: r.totalSorteios || 0 };
+    setStatus(`1ª Posição atualizada · ${r.totalSorteios || 0} sorteios`);
+    renderPos1(tipoPos1Atual); renderHomePos1();
+  } catch (e) {
+    div.innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    setStatus('Erro ao carregar 1ª posição', true);
+  }
+}
+function mostrarPos1(tipo, btn) {
+  tipoPos1Atual = tipo;
+  document.querySelectorAll('#painel-pos1 .sub-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (!cachePos1) { carregarAtrasadosPos1(); return; }
+  renderPos1(tipo);
+}
+function renderPos1(tipo) {
+  const div = document.getElementById('lista-pos1');
+  const titulo = document.getElementById('titulo-pos1');
+  const badge = document.getElementById('badge-pos1');
+  const labels = {
+    milhar: 'Milhares mais atrasadas na 1ª posição',
+    centena: 'Centenas mais atrasadas na 1ª posição',
+    dezena: 'Dezenas mais atrasadas na 1ª posição',
+    grupo: 'Grupos mais atrasados na 1ª posição'
+  };
+  titulo.textContent = labels[tipo] || 'Atrasados 1ª Posição';
+  badge.textContent = 'Top 15';
+  div.innerHTML = '';
+  if (!cachePos1) { div.innerHTML = '<div class="empty">Carregando...</div>'; return; }
+  const lista = cachePos1[tipo] || [];
+  if (!lista.length) {
+    div.innerHTML = `<div class="empty">Nenhum dado de <strong>${tipo}</strong> na 1ª posição.</div>`;
+    document.getElementById('btn-copiar-pos1').style.display = 'none';
+    return;
+  }
+  lista.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card ' + tipo;
+    card.innerHTML = `<div class="rank">#${item.posicao}</div><div class="num">${item.valor}</div>
+      <div class="meta">Atraso: ${item.atraso} sorteios<br>Freq: ${item.frequencia}<br>${item.ultimo_numero || ''}</div>`;
+    div.appendChild(card);
+  });
+  document.getElementById('btn-copiar-pos1').style.display = 'inline-block';
+}
+async function previsao() {
+  setStatus('Calculando análise...');
+  try {
+    const r = await api('previsao');
+    setStatus('Análise atualizada');
+    mostrarPrevisao(r);
+    trocarPainel('painel-analise', document.querySelector('[data-panel="painel-analise"]'));
+  } catch (e) { setStatus('Erro na análise: ' + e.message, true); }
+}
+function mostrarPrevisao(r) {
+  cacheSugestao = r.sugestao || [];
+  ['sugestao', 'sugestao-analise'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    (r.sugestao || []).forEach((num, i) => {
+      const card = document.createElement('div');
+      card.className = 'sugestao-card';
+      card.innerHTML = `<div class="pos">Pos ${i + 1}</div><div class="num">${num}</div>`;
+      el.appendChild(card);
+    });
+  });
+  document.getElementById('btn-copiar-sugestao').style.display = cacheSugestao.length ? 'inline-block' : 'none';
+  document.getElementById('btn-copiar-sugestao-analise').style.display = cacheSugestao.length ? 'inline-block' : 'none';
+  [document.getElementById('ranking-geral'), document.getElementById('ranking-geral-analise')].forEach(el => {
+    if (!el) return;
+    el.innerHTML = '';
+    (r.ranking_geral || []).forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<div class="rank">#${i + 1}</div><div class="num">${p.candidato}</div>
+        <div class="meta">Score ${p.pontuacao}<br>F ${p.frequencia} · A ${p.atraso}</div>`;
+      el.appendChild(card);
+    });
+  });
+  document.getElementById('secao-geral-home').style.display = 'block';
+  document.getElementById('secao-geral').style.display = 'block';
+  const posDiv = document.getElementById('por-posicao');
+  if (posDiv) {
+    posDiv.innerHTML = '';
+    (r.por_posicao || []).forEach(item => {
+      const box = document.createElement('div');
+      box.className = 'pos-box';
+      let html = `<div class="pos-title">Posição ${item.posicao}</div><div class="candidatos">`;
+      (item.candidatos || []).forEach(c => {
+        html += `<div class="candidato"><strong>${c.candidato}</strong>
+          <span> · ${c.pontuacao} · F${c.frequencia} A${c.atraso}</span></div>`;
+      });
+      html += '</div>';
+      box.innerHTML = html;
+      posDiv.appendChild(box);
+    });
+    document.getElementById('secao-posicao').style.display = 'block';
+  }
+}
+async function backtest() {
+  setStatus('Executando backtest...');
+  try {
+    const r = await api('backtest');
+    setStatus(`Backtest · ${r.testes || 0} testes · ${r.acertos_top10 || r.acertos || 0} acertos`);
+  } catch (e) { setStatus('Erro no backtest: ' + e.message, true); }
+}
+function renderBarrasTaxas(taxas) {
+  const items = [
+    { label: 'Milhar', pct: taxas.milhar || 0, classe: 'milhar' },
+    { label: 'Centena', pct: taxas.centena || 0, classe: 'centena' },
+    { label: 'Dezena', pct: taxas.dezena || 0, classe: 'dezena' },
+    { label: 'Grupo', pct: taxas.grupo || 0, classe: 'grupo' },
+    { label: 'Sugestão', pct: taxas.sugestao || 0, classe: 'sugestao' }
+  ];
+  return items.map(it => {
+    const w = Math.max(0, Math.min(100, Number(it.pct) || 0));
+    return `<div class="bar-row">
+      <div class="bar-label">${it.label}</div>
+      <div class="bar-track"><div class="bar-fill ${it.classe}" style="width:${w}%"></div></div>
+      <div class="bar-pct">${w}%</div>
+    </div>`;
+  }).join('');
+}
+function renderHistoricoItens(itens, containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  if (!itens || !itens.length) { box.innerHTML = '<div class="empty">Nenhuma previsão salva ainda.</div>'; return; }
+  box.innerHTML = '';
+  itens.forEach(it => {
+    const ac = it.acertos || {};
+    const st = it.status === 'FECHADO' ? '<span class="badge-ok">FECHADO</span>' : '<span class="badge-pend">' + (it.status || 'PENDENTE') + '</span>';
+    const div = document.createElement('div');
+    div.className = 'hist-card';
+    div.innerHTML = `
+      <div class="title">${st} · ${it.criado || it.id || ''}</div>
+      <div class="meta">
+        ${it.sorteio && it.sorteio.data
+          ? `Sorteio: ${it.sorteio.data} ${it.sorteio.hora || ''}<br>Números: ${(it.sorteio.numeros || []).join(' ')}<br>`
+          : 'Aguardando sorteio<br>'}
+        Acertos → M:${ac.milhar||0} C:${ac.centena||0} D:${ac.dezena||0} G:${ac.grupo||0}
+        · Sug M:${ac.sugestao||0} / C:${ac.sugestao_centena||0}
+        ${it.detalhes ? '<br>' + it.detalhes : ''}
+      </div>`;
+    box.appendChild(div);
+  });
+}
+function renderDonut(taxas) {
+  const colors = { milhar: '#a78bfa', centena: '#67e8f9', dezena: '#fcd34d', grupo: '#6ee7b7', sugestao: '#60a5fa' };
+  const labels = { milhar: 'Milhar', centena: 'Centena', dezena: 'Dezena', grupo: 'Grupo', sugestao: 'Sugestão' };
+  const keys = ['milhar', 'centena', 'dezena', 'grupo', 'sugestao'];
+  const realValues = keys.map(k => Math.max(0, Math.min(100, Number(taxas[k]) || 0)));
+  const media = realValues.length ? Math.round(realValues.reduce((a, b) => a + b, 0) / realValues.length) : 0;
+  document.getElementById('donut-total').textContent = media + '%';
+  document.getElementById('badge-donut').textContent = media + '% média';
+  const sumPositive = realValues.reduce((a, b) => a + (b > 0 ? b : 0), 0) || 1;
+  const normalized = realValues.map(v => v > 0 ? (v / sumPositive) * 100 : 0);
+  const svg = document.getElementById('donut-svg');
+  while (svg.children.length > 1) svg.removeChild(svg.lastChild);
+  let offset = 25;
+  normalized.forEach((val, i) => {
+    if (val <= 0) return;
+    const circ = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circ.setAttribute('cx', '21'); circ.setAttribute('cy', '21'); circ.setAttribute('r', '15.915');
+    circ.setAttribute('fill', 'transparent'); circ.setAttribute('stroke', colors[keys[i]]);
+    circ.setAttribute('stroke-width', '5');
+    circ.setAttribute('stroke-dasharray', `${val} ${100 - val}`);
+    circ.setAttribute('stroke-dashoffset', offset);
+    circ.style.transition = 'stroke-dasharray 0.8s ease';
+    svg.appendChild(circ);
+    offset -= val;
+  });
+  const legend = document.getElementById('donut-legend');
+  legend.innerHTML = keys.map((k, i) => `
+    <div class="legend-item">
+      <div class="legend-color" style="background:${colors[k]}"></div>
+      <span>${labels[k]}</span>
+      <span class="legend-pct">${realValues[i]}%</span>
+    </div>`).join('');
+}
+async function carregarUltimas50Previsoes(containerId = 'lista-historico-prev') {
+  const box = document.getElementById(containerId);
+  if (box) box.innerHTML = '<div class="empty">Carregando últimas 50 previsões...</div>';
+  try {
+    const r = await api('historico_previsoes');
+    const itens = (r.itens || []).slice(0, 50);
+    if (containerId === 'lista-historico-prev') {
+      const chart = document.getElementById('chart-taxas');
+      if (chart) chart.innerHTML = renderBarrasTaxas(r.taxas || {});
+      const badge = document.getElementById('badge-taxas');
+      if (badge) badge.textContent = (r.fechados || 0) + ' fechadas';
+    }
+    renderHistoricoItens(itens, containerId);
+    setStatus(`Mostrando as últimas ${itens.length} previsões salvas`);
+  } catch (e) {
+    if (box) box.innerHTML = `<div class="empty">Erro ao carregar histórico: ${e.message}</div>`;
+    setStatus('Erro ao carregar histórico de previsões', true);
+  }
+}
+async function carregarHomeCompleto() {
+  try {
+    const r = await api('historico_previsoes');
+    renderDonut(r.taxas || {});
+    renderHistoricoItens((r.itens || []).slice(0, 50), 'lista-historico-home');
+  } catch (e) {
+    document.getElementById('lista-historico-home').innerHTML = `<div class="empty">Erro histórico: ${e.message}</div>`;
+  }
+  renderHomePos1(); renderHomePalpitao(); atualizarBarraHorarios();
+}
+async function renderHomePos1() {
+  const box = document.getElementById('home-pos1');
+  if (!box) return;
+  try {
+    if (!cachePos1) {
+      const r = await apiExtra('atrasados_pos1');
+      cachePos1 = { milhar: r.milhar || [], centena: r.centena || [], dezena: r.dezena || [], grupo: r.grupo || [] };
+    }
+    const lista = (cachePos1.milhar || []).slice(0, 5);
+    if (!lista.length) { box.innerHTML = '<div class="empty" style="padding:10px;font-size:13px;">Sem dados</div>'; return; }
+    box.innerHTML = lista.map(i => `<div class="quick-chip" style="border-color:#5b21b6;color:#c4b5fd;">${i.valor}</div>`).join('');
+  } catch (e) { box.innerHTML = `<div class="empty" style="padding:10px;font-size:13px;">Erro</div>`; }
+}
+async function renderHomePalpitao() {
+  const box = document.getElementById('home-palpitao');
+  if (!box) return;
+  try {
+    if (!cachePalpitao.length) {
+      const r = await apiExtra('palpitao');
+      cachePalpitao = r.dezenas || [];
+    }
+    const lista = cachePalpitao.slice(0, 8);
+    if (!lista.length) { box.innerHTML = '<div class="empty" style="padding:10px;font-size:13px;">Sem dados</div>'; return; }
+    box.innerHTML = lista.map(d => `<div class="quick-chip" style="border-color:#b45309;color:#fcd34d;">${d.dezena}</div>`).join('');
+  } catch (e) { box.innerHTML = `<div class="empty" style="padding:10px;font-size:13px;">Erro</div>`; }
+}
+async function salvarPrevisaoAgora() {
+  setStatus('Salvando previsão...');
+  try {
+    const r = await api('salvar_previsao');
+    setStatus(r.sucesso ? ('Previsão salva: ' + (r.idPrev || 'ok')) : 'Falha ao salvar');
+    carregarUltimas50Previsoes(); carregarHomeCompleto();
+  } catch (e) { setStatus('Erro ao salvar: ' + e.message, true); }
+}
+async function verificarAcertos() {
+  const box = document.getElementById('box-acertos');
+  box.innerHTML = '<div class="empty">Verificando...</div>';
+  setStatus('Comparando atrasados com o último sorteio...');
+  try {
+    const coletaPromise = api('coletar', 90000).catch(() => null);
+    const r = await api('verificar');
+    await coletaPromise;
+    const sorteio = r.sorteio || (r.verificacao && r.verificacao.sorteio) || null;
+    const s = r.resumo || (r.verificacao && r.verificacao.resumo) || {};
+    if (!sorteio) {
+      box.innerHTML = '<div class="empty">Nenhum sorteio encontrado. Faça a coleta primeiro.</div>';
+      setStatus('Nenhum sorteio encontrado', true);
+      return;
+    }
+    let html = `<div class="draw-header">🕐 ${sorteio.data || formatarData(sorteio.data)} · ${sorteio.hora || ''} · ID ${sorteio.id || ''}</div>`;
+    html += `<div class="grid" style="margin:12px 0;">`;
+    (sorteio.numeros || []).forEach((n, i) => {
+      html += `<div class="card"><div class="rank">Pos ${i+1}</div><div class="num">${n}</div></div>`;
+    });
+    html += `</div>
+      <div class="section-header" style="margin-top:8px;"><div class="section-title">Resumo de acertos</div></div>
+      <div class="grid">
+        <div class="card milhar"><div class="rank">Milhar</div><div class="num">${s.milhar||0}</div></div>
+        <div class="card centena"><div class="rank">Centena</div><div class="num">${s.centena||0}</div></div>
+        <div class="card dezena"><div class="rank">Dezena</div><div class="num">${s.dezena||0}</div></div>
+        <div class="card grupo"><div class="rank">Grupo</div><div class="num">${s.grupo||0}</div></div>
+        <div class="card" style="border-color:#2563eb;"><div class="rank">Sugestão milhar</div><div class="num">${s.sugestao||0}</div></div>
+        <div class="card" style="border-color:#0891b2;"><div class="rank">Sugestão centena</div><div class="num">${s.sugestao_centena||0}</div></div>
+      </div>`;
+    box.innerHTML = html;
+    const total = (s.milhar||0)+(s.centena||0)+(s.dezena||0)+(s.grupo||0)+(s.sugestao||0)+(s.sugestao_centena||0);
+    setStatus(total > 0
+      ? `Acertos: M${s.milhar||0} C${s.centena||0} D${s.dezena||0} G${s.grupo||0} · Sug ${s.sugestao||0}/${s.sugestao_centena||0}`
+      : 'Nenhum acerto neste sorteio');
+    carregarUltimas50Previsoes(); carregarHomeCompleto(); atualizarBarraHorarios();
+  } catch (e) {
+    box.innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    setStatus('Erro na verificação: ' + e.message, true);
+  }
+}
+async function carregarPalpiteGrupos() {
+  const box = document.getElementById('lista-palpite-grupos');
+  box.innerHTML = '<div class="empty">Analisando grupos atrasados...</div>';
+  setStatus('Gerando palpite por grupos...');
+  try {
+    const r = await apiExtra('palpite_grupos');
+    if (!r.grupos || !r.grupos.length) { box.innerHTML = '<div class="empty">Nenhum dado disponível.</div>'; return; }
+    cachePalpiteGrupos = r.grupos;
+    let html = `<div class="draw-header">Gerado em ${r.geradoEm || ''} · Base: ${r.totalSorteios || 0} sorteios</div>`;
+    r.grupos.forEach(g => {
+      html += `<div class="pos-box" style="border-left: 4px solid #10b981;">
+        <div class="pos-title">#${g.posicao} — Grupo ${g.grupo} · Atraso: ${g.atraso}</div>
+        <div class="candidatos">`;
+      (g.milhares || []).forEach(m => {
+        html += `<div class="candidato" style="background:#0f2a1f;border-color:#1a4d35;">
+          <strong style="color:#6ee7b7;font-size:16px;">${m.milhar}</strong>
+          <span> · Dez ${m.dezena}</span></div>`;
+      });
+      html += `</div></div>`;
+    });
+    box.innerHTML = html;
+    document.getElementById('btn-copiar-grupos').style.display = 'inline-block';
+    setStatus('Palpite por grupos gerado');
+  } catch (e) {
+    box.innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    setStatus('Erro ao gerar palpite por grupos', true);
+  }
+}
+async function carregarPalpitao() {
+  const box = document.getElementById('box-palpitao');
+  box.innerHTML = '<div class="empty">Analisando dezenas...</div>';
+  setStatus('Gerando Análise Palpitão...');
+  try {
+    const r = await apiExtra('palpitao');
+    if (!r.dezenas || !r.dezenas.length) { box.innerHTML = '<div class="empty">Nenhum dado disponível.</div>'; return; }
+    cachePalpitao = r.dezenas;
+    const a = r.analitico || {};
+    let html = `
+      <div class="draw-header">Gerado em ${r.geradoEm || ''} · Base: ${r.totalSorteios || 0} sorteios</div>
+      <div class="pos-box" style="border-left: 4px solid #f59e0b; margin-top:14px;">
+        <div class="pos-title">📊 Analítico Histórico</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:10px;">
+          <div class="card"><div class="rank">Média de acertos</div><div class="num" style="color:#fbbf24;">${a.mediaAcertos || 0}</div></div>
+          <div class="card"><div class="rank">Taxa ≥ 10 acertos</div><div class="num" style="color:#34d399;">${a.taxaAcima10 || 0}%</div></div>
+          <div class="card"><div class="rank">Melhor</div><div class="num">${a.melhor || 0}</div></div>
+          <div class="card"><div class="rank">Pior</div><div class="num">${a.pior || 0}</div></div>
+        </div>
+      </div>
+      <div class="section-header" style="margin-top:20px;"><div class="section-title">🔥 20 Dezenas do Palpitão</div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">`;
+    r.dezenas.forEach(d => {
+      html += `<div class="dezena-chip" title="Freq: ${d.frequencia} | Atraso: ${d.atraso}">${d.dezena}</div>`;
+    });
+    html += `</div><div class="pos-box"><div class="pos-title">Detalhamento</div>
+      <div class="grid" style="margin-top:10px;">`;
+    r.dezenas.forEach((d, i) => {
+      html += `<div class="card" style="border-color:#b45309;">
+        <div class="rank">#${i+1}</div>
+        <div class="num" style="color:#fcd34d;">${d.dezena}</div>
+        <div class="meta">Freq: ${d.frequencia}<br>Atraso: ${d.atraso}<br>Score: ${d.score}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+    box.innerHTML = html;
+    document.getElementById('btn-copiar-palpitao').style.display = 'inline-block';
+    setStatus('Palpitão gerado com sucesso');
+    renderHomePalpitao();
+  } catch (e) {
+    box.innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    setStatus('Erro ao gerar Palpitão', true);
+  }
+}
+
+/* ===== VIP ===== */
+function abrirVip() {
+  window.open('https://login.lottotrivo.net/grupo', '_blank');
+}
+
+/* ===== BOT ===== */
+function abrirBot() {
+  document.getElementById('bot-overlay').classList.add('open');
+  const box = document.getElementById('bot-messages');
+  if (!box.children.length) {
+    adicionarMsgBot('Olá! 🤖 Sou o <strong>Bot Lotto Trivo</strong>.<br><br>Posso te ajudar com:<br>• Sugestão de jogo<br>• Grupos atrasados<br>• Dezenas (Palpitão)<br>• 1ª Posição<br>• Como jogar<br><br>O que você deseja?');
+    mostrarBotoesRapidos();
+  }
+}
+function fecharBot() {
+  document.getElementById('bot-overlay').classList.remove('open');
+}
+function adicionarMsgBot(html) {
+  const box = document.getElementById('bot-messages');
+  const div = document.createElement('div');
+  div.className = 'bot-msg bot';
+  div.innerHTML = html;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function adicionarMsgUser(texto) {
+  const box = document.getElementById('bot-messages');
+  const div = document.createElement('div');
+  div.className = 'bot-msg user';
+  div.textContent = texto;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function mostrarBotoesRapidos() {
+  const box = document.getElementById('bot-messages');
+  const div = document.createElement('div');
+  div.className = 'bot-msg bot';
+  div.innerHTML = `<div class="bot-quick">
+    <button onclick="botAcao('sugestao')">🎯 Sugestão de jogo</button>
+    <button onclick="botAcao('grupos')">🎲 Grupos atrasados</button>
+    <button onclick="botAcao('palpitao')">🔥 Palpitão</button>
+    <button onclick="botAcao('pos1')">1️⃣ 1ª Posição</button>
+    <button onclick="botAcao('como')">📖 Como jogar</button>
+    <button onclick="botAcao('app')">📱 App para jogar</button>
+  </div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+async function botAcao(tipo) {
+  if (tipo === 'sugestao') {
+    adicionarMsgUser('Quero a sugestão de jogo');
+    adicionarMsgBot('Buscando a sugestão atual...');
+    try {
+      if (!cacheSugestao.length) {
+        const r = await api('previsao');
+        cacheSugestao = r.sugestao || [];
+      }
+      if (cacheSugestao.length) {
+        adicionarMsgBot(`🎯 <strong>Sugestão de jogo:</strong><br><br><strong style="font-size:16px;letter-spacing:1px;">${cacheSugestao.join('  ·  ')}</strong><br><br>📱 Para jogar agora, use o app oficial:<br><a href="${LINK_JOGO}" target="_blank">${LINK_JOGO}</a>`);
+      } else {
+        adicionarMsgBot('Ainda não há sugestão gerada. Toque em <strong>Análise</strong> no menu principal e volte aqui.');
+      }
+    } catch (e) {
+      adicionarMsgBot('Erro ao buscar sugestão: ' + e.message);
+    }
+  } else if (tipo === 'grupos') {
+    adicionarMsgUser('Quero os grupos atrasados');
+    adicionarMsgBot('Analisando grupos atrasados...');
+    try {
+      if (!cachePalpiteGrupos.length) {
+        const r = await apiExtra('palpite_grupos');
+        cachePalpiteGrupos = r.grupos || [];
+      }
+      if (cachePalpiteGrupos.length) {
+        let txt = '🎲 <strong>Grupos mais atrasados:</strong><br><br>';
+        cachePalpiteGrupos.slice(0, 5).forEach(g => {
+          const mils = (g.milhares || []).map(m => m.milhar).join(', ');
+          txt += `Grupo <strong>${g.grupo}</strong> (atraso ${g.atraso}): ${mils}<br>`;
+        });
+        txt += `<br>📱 Jogue agora: <a href="${LINK_JOGO}" target="_blank">Abrir aplicativo</a>`;
+        adicionarMsgBot(txt);
+      } else {
+        adicionarMsgBot('Nenhum grupo disponível no momento. Atualize na aba Grupos.');
+      }
+    } catch (e) {
+      adicionarMsgBot('Erro: ' + e.message);
+    }
+  } else if (tipo === 'palpitao') {
+    adicionarMsgUser('Quero o Palpitão');
+    adicionarMsgBot('Gerando Palpitão...');
+    try {
+      if (!cachePalpitao.length) {
+        const r = await apiExtra('palpitao');
+        cachePalpitao = r.dezenas || [];
+      }
+      if (cachePalpitao.length) {
+        const dez = cachePalpitao.slice(0, 12).map(d => d.dezena).join(' · ');
+        adicionarMsgBot(`🔥 <strong>Palpitão (dezenas fortes):</strong><br><br>${dez}<br><br>📱 Jogue no app: <a href="${LINK_JOGO}" target="_blank">${LINK_JOGO}</a>`);
+      } else {
+        adicionarMsgBot('Palpitão ainda não gerado. Atualize na aba Palpitão.');
+      }
+    } catch (e) {
+      adicionarMsgBot('Erro: ' + e.message);
+    }
+  } else if (tipo === 'pos1') {
+    adicionarMsgUser('Quero a 1ª Posição');
+    adicionarMsgBot('Buscando atrasados da 1ª posição...');
+    try {
+      if (!cachePos1) {
+        const r = await apiExtra('atrasados_pos1');
+        cachePos1 = { milhar: r.milhar || [] };
+      }
+      const lista = (cachePos1.milhar || []).slice(0, 8).map(i => i.valor).join(' · ');
+      if (lista) {
+        adicionarMsgBot(`1️⃣ <strong>Top milhares 1ª posição:</strong><br><br>${lista}<br><br>📱 App: <a href="${LINK_JOGO}" target="_blank">Jogar agora</a>`);
+      } else {
+        adicionarMsgBot('Sem dados de 1ª posição. Atualize na aba correspondente.');
+      }
+    } catch (e) {
+      adicionarMsgBot('Erro: ' + e.message);
+    }
+  } else if (tipo === 'como') {
+    adicionarMsgUser('Como jogar?');
+    adicionarMsgBot(`📖 <strong>Como jogar no Lotto Trivo:</strong><br><br>
+1. Veja a <strong>Sugestão de Jogo</strong> ou os <strong>Grupos atrasados</strong><br>
+2. Copie os números com o botão 📋<br>
+3. Abra o aplicativo oficial e faça sua aposta<br><br>
+📱 <a href="${LINK_JOGO}" target="_blank"><strong>Abrir aplicativo para jogar</strong></a><br><br>
+Dica: use também o Palpitão e a 1ª Posição para reforçar suas escolhas.`);
+  } else if (tipo === 'app') {
+    adicionarMsgUser('Quero o app para jogar');
+    adicionarMsgBot(`📱 <strong>Aplicativo oficial para jogar:</strong><br><br>
+<a href="${LINK_JOGO}" target="_blank" style="font-size:15px;">${LINK_JOGO}</a><br><br>
+Clique no link acima e faça sua aposta com segurança.`);
+  }
+  mostrarBotoesRapidos();
+}
+function enviarBot() {
+  const input = document.getElementById('bot-input');
+  const texto = (input.value || '').trim().toLowerCase();
+  if (!texto) return;
+  input.value = '';
+  adicionarMsgUser(texto);
+
+  if (texto.includes('sugest') || texto.includes('jogo') || texto.includes('número') || texto.includes('numero')) {
+    botAcao('sugestao');
+  } else if (texto.includes('grupo')) {
+    botAcao('grupos');
+  } else if (texto.includes('palpit') || texto.includes('dezena')) {
+    botAcao('palpitao');
+  } else if (texto.includes('posição') || texto.includes('posicao') || texto.includes('1ª') || texto.includes('primeira')) {
+    botAcao('pos1');
+  } else if (texto.includes('como') || texto.includes('jogar') || texto.includes('ajuda')) {
+    botAcao('como');
+  } else if (texto.includes('app') || texto.includes('aplicativo') || texto.includes('link')) {
+    botAcao('app');
+  } else {
+    adicionarMsgBot('Entendi! Você pode pedir:<br>• <strong>sugestão</strong><br>• <strong>grupos</strong><br>• <strong>palpitão</strong><br>• <strong>1ª posição</strong><br>• <strong>como jogar</strong><br>• <strong>app</strong><br><br>Ou use os botões rápidos abaixo.');
+    mostrarBotoesRapidos();
+  }
+}
+
+/* ===== AGENDADOR ===== */
+function getHoraMinuto() {
+  const now = new Date();
+  return String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+function getHoje() { return new Date().toISOString().slice(0,10); }
+function jaExecutou(tipo, horario) {
+  return localStorage.getItem(`auto_${tipo}_${getHoje()}_${horario}`) === '1';
+}
+function marcarExecutado(tipo, horario) {
+  localStorage.setItem(`auto_${tipo}_${getHoje()}_${horario}`, '1');
+}
+function checkSchedule() {
+  const hm = getHoraMinuto();
+  HORARIOS_VERIFICAR.forEach(horaVerificar => {
+    const [h, m] = horaVerificar.split(':').map(Number);
+    let salvarH = h, salvarM = m - 10;
+    if (salvarM < 0) { salvarM += 60; salvarH = (salvarH - 1 + 24) % 24; }
+    const horaSalvar = String(salvarH).padStart(2,'0') + ':' + String(salvarM).padStart(2,'0');
+    if (hm === horaSalvar && !jaExecutou('salvar', horaSalvar)) {
+      marcarExecutado('salvar', horaSalvar);
+      setStatus(`⏰ Automático: salvando previsão (${horaSalvar})...`);
+      salvarPrevisaoAgora();
+    }
+    if (hm === horaVerificar && !jaExecutou('verificar', horaVerificar)) {
+      marcarExecutado('verificar', horaVerificar);
+      setStatus(`⏰ Automático: verificando acertos (${horaVerificar})...`);
+      verificarAcertos();
+    }
+  });
+}
+function checkSalvar5MinDepois() {
+  const hm = getHoraMinuto();
+  HORARIOS_VERIFICAR.forEach(horaResultado => {
+    const [h, m] = horaResultado.split(':').map(Number);
+    let salvarH = h, salvarM = m + 5;
+    if (salvarM >= 60) { salvarM -= 60; salvarH = (salvarH + 1) % 24; }
+    const horaSalvar = String(salvarH).padStart(2,'0') + ':' + String(salvarM).padStart(2,'0');
+    if (hm === horaSalvar && !jaExecutou('salvar_5min', horaSalvar)) {
+      marcarExecutado('salvar_5min', horaSalvar);
+      setStatus(`⏰ Automático: salvando previsão 5 min após resultado (${horaSalvar})...`);
+      salvarPrevisaoAgora();
+    }
+  });
+}
+setInterval(checkSchedule, 20000);
+setInterval(checkSalvar5MinDepois, 20000);
+setInterval(atualizarBarraHorarios, 60000);
+
+verificarSessao();
+</script>
+
+<script>
+/* Botões flutuantes: BOT (acima) + JOGAR PALPITE (abaixo) */
+(function() {
+  // BOT
+  const botaoBot = document.createElement('button');
+  botaoBot.id = 'btn-bot-flutuante';
+  botaoBot.innerHTML = '🤖';
+  botaoBot.title = 'Abrir Bot Lotto Trivo';
+  botaoBot.style.cssText = `
+    position: fixed; bottom: 95px; right: 25px; z-index: 999999;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #22d3ee);
+    color: #fff; border: none; font-size: 26px;
+    cursor: pointer; box-shadow: 0 4px 18px rgba(59,130,246,0.55);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  `;
+  botaoBot.onmouseover = () => botaoBot.style.transform = 'scale(1.1)';
+  botaoBot.onmouseout = () => botaoBot.style.transform = 'scale(1)';
+  botaoBot.onclick = abrirBot;
+  document.body.appendChild(botaoBot);
+
+  // JOGAR PALPITE
+  const botao = document.createElement('button');
+  botao.id = 'btn-jogar-palpite';
+  botao.innerHTML = 'JOGAR PALPITE';
+  botao.title = 'Jogar Palpite Agora';
+  botao.style.cssText = `
+    position: fixed; bottom: 25px; right: 25px; z-index: 999999;
+    background: linear-gradient(135deg, #ff0000, #ff4d4d, #ff1a1a);
+    color: #fff; border: none; border-radius: 50px;
+    font-size: 16px; font-weight: 900; letter-spacing: 1px;
+    padding: 16px 28px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 6px 20px rgba(0,0,0,0.4);
+    text-transform: uppercase; animation: pulseJogar 1.6s infinite;
+    transition: all 0.25s ease; font-family: Arial, sans-serif;
+  `;
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes pulseJogar {
+      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.8); }
+      70% { box-shadow: 0 0 0 18px rgba(255, 0, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+    }
+    #btn-jogar-palpite:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 8px 25px rgba(0,0,0,0.5);
+    }
+  `;
+  document.head.appendChild(style);
+  botao.onclick = function() {
+    window.open(LINK_JOGO, '_blank');
+  };
+  document.body.appendChild(botao);
+})();
+</script>
+</body>
+</html>
+ 
